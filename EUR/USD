@@ -1,0 +1,45 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
+type QuoteResponse struct {
+	Result []struct {
+		RegularMarketPrice float64 `json:"regularMarketPrice"`
+	} `json:"result"`
+}
+
+func main() {
+	// Set the URL for the Yahoo Finance API endpoint
+	url := "https://query1.finance.yahoo.com/v7/finance/quote?symbols=EURUSD=X"
+
+	// Make the HTTP GET request to the endpoint
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Unmarshal the JSON response into a QuoteResponse struct
+	var quoteResponse QuoteResponse
+	err = json.Unmarshal(body, &quoteResponse)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Print the regular market price for EUR/USD
+	fmt.Printf("Regular market price for EUR/USD: %.4f\n", quoteResponse.Result[0].RegularMarketPrice)
+}
